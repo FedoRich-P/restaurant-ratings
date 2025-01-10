@@ -12,18 +12,23 @@ import {
 import {Header} from "@/components/Header/Header";
 import {SearchBar} from "@/components/SearchBar/SearchBar";
 import {RestaurantCard} from "@/components/RestaurantCard/RestaurantCard";
+import {RegisterForm} from "@/components/RegisterForm/RegisterForm";
+import {LoginForm} from "@/components/LoginForm/LoginForm";
 
 export default function HomePage() {
     const [searchQuery, setSearchQuery] = useState('');
     const [isModalOpen, setIsModalOpen] = useState(false);
-    const { data: restaurants = [], isLoading, isError } = useGetRestaurantsQuery();
+    const {data: restaurants = [], isLoading, isError} = useGetRestaurantsQuery();
     const [updateRating] = useUpdateRestaurantRatingMutation();
     const [addRestaurant] = useAddRestaurantMutation();
     const [deleteRestaurant] = useDeleteRestaurantMutation();
+    // ===================================================================================
+    const [isLogin, setIsLogin] = useState(true);
+    // ===================================================================================
 
     const handleRatingChange = async (id: string, newRating: number) => {
         try {
-            await updateRating({ id, rating: newRating }).unwrap();
+            await updateRating({id, rating: newRating}).unwrap();
         } catch (error) {
             console.error('Failed to update rating:', error);
         }
@@ -52,11 +57,23 @@ export default function HomePage() {
     if (isLoading) return <div>Loading...</div>;
     if (isError) return <div>Error loading restaurants</div>;
 
+    // <div style={{padding: '20px', maxWidth: '400px', margin: '0 auto'}}>
+    //     <h1>{isLogin ? 'Вход' : 'Регистрация'}</h1>
+    //     {isLogin ? <LoginForm/> : <RegisterForm/>}
+    //     <button
+    //         onClick={() => setIsLogin(!isLogin)}
+    //         style={{marginTop: '10px', color: 'blue', cursor: 'pointer'}}
+    //     >
+    //         {isLogin ? 'Нет аккаунта? Зарегистрируйтесь' : 'Уже есть аккаунт? Войдите'}
+    //     </button>
+    // </div>
+
     return (
         <div style={{maxWidth: '60vw', margin: '0 auto'}}>
-            <Header />
-            <SearchBar onSearch={setSearchQuery} />
-            <Button variant="contained" onClick={() => setIsModalOpen(true)} sx={{ mb: 2 }}>
+            <Header/>
+
+            <SearchBar onSearch={setSearchQuery}/>
+            <Button variant="contained" onClick={() => setIsModalOpen(true)} sx={{mb: 2}}>
                 Добавить ресторан
             </Button>
             <AddRestaurantModal

@@ -3,7 +3,7 @@
     "id": "1",
     "name": "Mamas Kitchen",
     "cuisine": "American",
-    "rating": 4.7
+    "rating": 3.5
   },
   {
     "id": "2",
@@ -22,11 +22,5 @@
     "name": "Burger",
     "cuisine": "American",
     "rating": 4
-  },
-  {
-    "id": "5",
-    "name": "Вай вай",
-    "cuisine": "да",
-    "rating": 5
   }
 ]
