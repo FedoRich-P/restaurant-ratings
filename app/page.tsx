@@ -1,95 +1,80 @@
-import Image from "next/image";
-import styles from "./page.module.css";
+'use client';
 
-export default function Home() {
-  return (
-    <div className={styles.page}>
-      <main className={styles.main}>
-        <Image
-          className={styles.logo}
-          src="/next.svg"
-          alt="Next.js logo"
-          width={180}
-          height={38}
-          priority
-        />
-        <ol>
-          <li>
-            Get started by editing <code>app/page.tsx</code>.
-          </li>
-          <li>Save and see your changes instantly.</li>
-        </ol>
+import { useState } from 'react';
 
-        <div className={styles.ctas}>
-          <a
-            className={styles.primary}
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className={styles.logo}
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={20}
-              height={20}
+import AddRestaurantModal from '../components/AddRestaurantModal/AddRestaurantModal';
+import { Button } from '@mui/material';
+import {
+    useAddRestaurantMutation, useDeleteRestaurantMutation,
+    useGetRestaurantsQuery,
+    useUpdateRestaurantRatingMutation
+} from "@/services/restaurantsApi";
+import {Header} from "@/components/Header/Header";
+import {SearchBar} from "@/components/SearchBar/SearchBar";
+import {RestaurantCard} from "@/components/RestaurantCard/RestaurantCard";
+
+export default function HomePage() {
+    const [searchQuery, setSearchQuery] = useState('');
+    const [isModalOpen, setIsModalOpen] = useState(false);
+    const { data: restaurants = [], isLoading, isError } = useGetRestaurantsQuery();
+    const [updateRating] = useUpdateRestaurantRatingMutation();
+    const [addRestaurant] = useAddRestaurantMutation();
+    const [deleteRestaurant] = useDeleteRestaurantMutation();
+
+    const handleRatingChange = async (id: string, newRating: number) => {
+        try {
+            await updateRating({ id, rating: newRating }).unwrap();
+        } catch (error) {
+            console.error('Failed to update rating:', error);
+        }
+    };
+
+    const handleAddRestaurant = async (data: { name: string; cuisine: string }) => {
+        try {
+            await addRestaurant(data).unwrap();
+        } catch (error) {
+            console.error('Failed to add restaurant:', error);
+        }
+    };
+
+    const handleDeleteRestaurant = async (id: string) => {
+        try {
+            await deleteRestaurant(id).unwrap();
+        } catch (error) {
+            console.error('Failed to delete restaurant:', error);
+        }
+    };
+
+    const filteredRestaurants = restaurants.filter((restaurant) =>
+        restaurant.name.toLowerCase().includes(searchQuery.toLowerCase())
+    );
+
+    if (isLoading) return <div>Loading...</div>;
+    if (isError) return <div>Error loading restaurants</div>;
+
+    return (
+        <div style={{maxWidth: '60vw', margin: '0 auto'}}>
+            <Header />
+            <SearchBar onSearch={setSearchQuery} />
+            <Button variant="contained" onClick={() => setIsModalOpen(true)} sx={{ mb: 2 }}>
+                Добавить ресторан
+            </Button>
+            <AddRestaurantModal
+                open={isModalOpen}
+                onClose={() => setIsModalOpen(false)}
+                onSubmit={handleAddRestaurant}
             />
-            Deploy now
-          </a>
-          <a
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-            className={styles.secondary}
-          >
-            Read our docs
-          </a>
+            {filteredRestaurants.map((restaurant) => (
+                <RestaurantCard
+                    key={restaurant.id}
+                    id={restaurant.id}
+                    name={restaurant.name}
+                    cuisine={restaurant.cuisine}
+                    rating={restaurant.rating}
+                    onRatingChange={(newRating) => handleRatingChange(restaurant.id, newRating)}
+                    onDelete={handleDeleteRestaurant}
+                />
+            ))}
         </div>
-      </main>
-      <footer className={styles.footer}>
-        <a
-          href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/file.svg"
-            alt="File icon"
-            width={16}
-            height={16}
-          />
-          Learn
-        </a>
-        <a
-          href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/window.svg"
-            alt="Window icon"
-            width={16}
-            height={16}
-          />
-          Examples
-        </a>
-        <a
-          href="https://nextjs.org?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/globe.svg"
-            alt="Globe icon"
-            width={16}
-            height={16}
-          />
-          Go to nextjs.org →
-        </a>
-      </footer>
-    </div>
-  );
+    );
 }
