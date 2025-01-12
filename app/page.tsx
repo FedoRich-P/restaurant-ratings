@@ -25,7 +25,7 @@ export default function HomePage() {
     // ===================================================================================
     const [isLogin, setIsLogin] = useState(true);
     // ===================================================================================
-//!!первый коммит!!
+//!!первый коммит!!// новый коммит в ветки
     const handleRatingChange = async (id: string, newRating: number) => {
         try {
             await updateRating({id, rating: newRating}).unwrap();
